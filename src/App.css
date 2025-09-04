@@ -1,0 +1,258 @@
+/* App.css */
+
+/* General layout */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* Card styling */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-top: 20px;
+}
+
+/* Question text */
+.question-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Options */
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.option-btn:hover {
+  background-color: #e0f2fe;
+  border-color: #3b82f6;
+}
+
+.option-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.option-selected {
+  background-color: #bae6fd;
+  border-color: #3b82f6;
+}
+
+/* Next button */
+.next-btn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Navigation buttons group */
+.card .next-btn {
+  flex: 1;
+  margin: 0 5px;
+  padding: 12px;
+  background-color: #10b981;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card .next-btn:hover {
+  background-color: #059669;
+}
+
+.card .next-btn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+
+.next-btn:hover {
+  background-color: #059669;
+}
+
+/* ScoreBoard */
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 10px;
+  background-color: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+/* Results */
+.results-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.results-score {
+  text-align: center;
+  font-size: 1.25rem;
+  margin-bottom: 24px;
+}
+
+.results-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 0;
+}
+
+.correct-answer {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.wrong-answer {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Retry/Restart buttons */
+.retry-btn,
+.restart-btn {
+  display: block;
+  margin: 20px auto 0 auto;
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover,
+.restart-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Loading and Error */
+.center-text {
+  text-align: center;
+  margin-top: 80px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+/* Timer styling */
+.timer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1f2937;
+}
+
+.timer-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.timer-fill {
+  height: 100%;
+  background-color: #f97316;
+  width: 100%;
+  transition: width 1s linear;
+}
+
+/* HomePage styling */
+.home-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* full viewport height */
+  background: linear-gradient(135deg, #3b82f6, #10b981);
+}
+
+.home-card {
+  background-color: #ffffff;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.home-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #1f2937;
+}
+
+.home-subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 32px;
+  color: #4b5563;
+}
+
+.home-start-btn {
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.home-start-btn:hover {
+  background-color: #2563eb;
+  transform: scale(1.05);
+}
