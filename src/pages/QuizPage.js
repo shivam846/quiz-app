@@ -5,6 +5,7 @@ import Results from "../components/Results";
 
 const QuizPage = () => {
   const [questions, setQuestions] = useState([]);
+  const [difficulty, setDifficulty] = useState("easy"); // Default difficulty
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [timedOutQuestions, setTimedOutQuestions] = useState([]);
@@ -14,14 +15,24 @@ const QuizPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [highScore, setHighScore] = useState(
+    parseInt(localStorage.getItem("quizHighScore")) || 0
+  );
 
-  // Fetch questions from API
+  const decodeHtml = (html) => {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  };
+
+  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
+
   const fetchQuestions = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const apiUrl = `https://opentdb.com/api.php?amount=10&type=multiple`;
+      const apiUrl = `https://opentdb.com/api.php?amount=10&difficulty=${difficulty}&type=multiple`;
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
       const response = await fetch(proxyUrl);
       if (!response.ok) throw new Error("Network response was not ok");
@@ -40,28 +51,25 @@ const QuizPage = () => {
       }));
 
       setQuestions(formattedQuestions);
-      setQuestionTimers(new Array(formattedQuestions.length).fill(30)); // initialize timer per question
+      setQuestionTimers(new Array(formattedQuestions.length).fill(30));
+      setSelectedAnswers([]);
+      setTimedOutQuestions([]);
+      setCurrentIndex(0);
+      setScore(0);
+      setShowResults(false);
+      setTimeLeft(30);
       setLoading(false);
     } catch (err) {
       console.error("Error fetching questions:", err);
       setError("Failed to load questions. Please try again.");
       setLoading(false);
     }
-  }, []);
-
-  const decodeHtml = (html) => {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-  };
-
-  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
+  }, [difficulty]);
 
   useEffect(() => {
     fetchQuestions();
   }, [fetchQuestions]);
 
-  // Handle answer selection
   const handleAnswer = useCallback(
     (answer) => {
       if (selectedAnswers[currentIndex] || timedOutQuestions.includes(currentIndex)) return;
@@ -77,7 +85,6 @@ const QuizPage = () => {
     [currentIndex, questions, selectedAnswers, timedOutQuestions]
   );
 
-  // Navigation handlers
   const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -90,7 +97,11 @@ const QuizPage = () => {
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
-      setTimeLeft(questionTimers[currentIndex - 1]);
+      setTimeLeft(
+        timedOutQuestions.includes(currentIndex - 1)
+          ? 0
+          : questionTimers[currentIndex - 1]
+      );
     }
   };
 
@@ -104,27 +115,18 @@ const QuizPage = () => {
   };
 
   const handleRestart = () => {
-    setSelectedAnswers([]);
-    setTimedOutQuestions([]);
-    setQuestionTimers(new Array(questions.length).fill(30));
-    setScore(0);
-    setCurrentIndex(0);
-    setShowResults(false);
     fetchQuestions();
   };
 
   // Timer effect
   useEffect(() => {
     if (showResults || loading) return;
-
-    // If already timed out, no timer needed
     if (timedOutQuestions.includes(currentIndex)) return;
 
     const timer = setInterval(() => {
       setQuestionTimers((prevTimers) => {
         const newTimers = [...prevTimers];
         if (newTimers[currentIndex] <= 1) {
-          // Time ran out
           if (!selectedAnswers[currentIndex]) {
             const updatedAnswers = [...selectedAnswers];
             updatedAnswers[currentIndex] = "No Answer";
@@ -144,24 +146,65 @@ const QuizPage = () => {
     return () => clearInterval(timer);
   }, [currentIndex, showResults, loading, selectedAnswers, handleNext, timedOutQuestions]);
 
-  // Loading / Error handling
+  // Update high score after quiz ends
+  useEffect(() => {
+    if (showResults && score > highScore) {
+      setHighScore(score);
+      localStorage.setItem("quizHighScore", score);
+    }
+  }, [showResults, score, highScore]);
+
+  // Difficulty selector with ARIA & keyboard accessibility
+  const DifficultySelector = () => (
+    <div style={{ textAlign: "center", marginBottom: "20px" }}>
+      <label style={{ marginRight: "10px", fontWeight: "600" }}>Difficulty:</label>
+      {["easy", "medium", "hard"].map((level) => (
+        <button
+          key={level}
+          onClick={() => setDifficulty(level)}
+          aria-pressed={difficulty === level}
+          aria-label={`Select ${level} difficulty`}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setDifficulty(level); }}
+          style={{
+            margin: "0 5px",
+            padding: "8px 16px",
+            borderRadius: "6px",
+            border: difficulty === level ? "2px solid #3b82f6" : "1px solid #d1d5db",
+            backgroundColor: difficulty === level ? "#bae6fd" : "#fff",
+            cursor: "pointer",
+          }}
+        >
+          {level.charAt(0).toUpperCase() + level.slice(1)}
+        </button>
+      ))}
+    </div>
+  );
+
   if (loading) return <p className="center-text">Loading questions...</p>;
   if (error)
     return (
       <div className="center-text">
         <p className="text-red-600">{error}</p>
-        <button onClick={fetchQuestions} className="retry-btn">Retry</button>
+        <button
+          onClick={fetchQuestions}
+          className="retry-btn"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fetchQuestions(); }}
+        >
+          Retry
+        </button>
       </div>
     );
 
   return (
     <div className="container">
+      <DifficultySelector />
       {!showResults ? (
         <>
           <ScoreBoard
             current={currentIndex + 1}
             total={questions.length}
             score={score}
+            highScore={highScore}
           />
 
           {/* Timer */}
@@ -175,23 +218,27 @@ const QuizPage = () => {
             </div>
           </div>
 
-          <QuestionCard
-            question={questions[currentIndex]}
-            handleAnswer={handleAnswer}
-            handleNext={handleNext}
-            handlePrevious={handlePrevious}
-            handleSkip={handleSkip}
-            selectedOption={selectedAnswers[currentIndex] || null}
-            currentIndex={currentIndex}
-            totalQuestions={questions.length}
-            isTimedOut={timedOutQuestions.includes(currentIndex)}
-          />
+          {/* Fade-in question */}
+          <div key={currentIndex} className="fade-in">
+            <QuestionCard
+              question={questions[currentIndex]}
+              handleAnswer={handleAnswer}
+              handleNext={handleNext}
+              handlePrevious={handlePrevious}
+              handleSkip={handleSkip}
+              selectedOption={selectedAnswers[currentIndex] || null}
+              currentIndex={currentIndex}
+              totalQuestions={questions.length}
+              isTimedOut={timedOutQuestions.includes(currentIndex)}
+            />
+          </div>
         </>
       ) : (
         <Results
           questions={questions}
           selectedAnswers={selectedAnswers}
           score={score}
+          highScore={highScore}
           handleRestart={handleRestart}
         />
       )}
